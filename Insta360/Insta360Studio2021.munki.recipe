@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads the latest version of insta360 studio 2020 and imports it into Munki.</string>
+    <string>Downloads the latest version of insta360 studio 2021 and imports it into Munki.</string>
     <key>Identifier</key>
-    <string>com.github.dataJAR-recipes.munki.insta360studio2020</string>
+    <string>com.github.dataJAR-recipes.munki.insta360studio2021</string>
       <key>Input</key>
     <dict>
         <key>MUNKI_REPO_SUBDIR</key>
         <string>apps/%NAME%</string>
         <key>NAME</key>
-        <string>Insta360Studio2020</string>
+        <string>Insta360Studio2021</string>
         <key>pkginfo</key>
         <dict>
             <key>catalogs</key>
@@ -21,9 +21,9 @@
 			<key>developer</key>
 			<string>Insta360</string>
             <key>description</key>
-            <string>Insta360 Studio 2020 allows users to edit videos and photos shot on ONE X, EVO and GO. It contains the Insta360 Plugin for Adobe Premiere Pro..</string>
+            <string>Insta360 Studio 2021 allows users to edit videos and photos shot on ONE X, EVO and GO. It contains the Insta360 Plugin for Adobe Premiere Pro..</string>
             <key>display_name</key>
-            <string>Insta360 Studio 2020</string>
+            <string>Insta360 Studio 2021</string>
             <key>name</key>
             <string>%NAME%</string>
             <key>unattended_install</key>
@@ -33,18 +33,9 @@
     <key>MinimumVersion</key>
     <string>0.3.1</string>
     <key>ParentRecipe</key>
-	<string>com.github.dataJAR-recipes.download.insta360studio2020</string>
+	<string>com.github.dataJAR-recipes.download.insta360studio2021</string>
     <key>Process</key>
 	<array>
-        <dict>
-            <key>Processor</key>
-            <string>DeprecationWarning</string>
-            <key>Arguments</key>
-            <dict>
-                <key>warning_message</key>
-                <string>The vender has replaced this App with their 2021 version. See the 2021 recipes https://github.com/autopkg/dataJAR-recipes/blob/master/Insta360/Insta360Studio2021.munki.recipe. Please remove this from your list of recipes.</string>
-             </dict>
-        </dict>
 		<dict>
 			<key>Arguments</key>
 				<dict>
@@ -64,7 +55,7 @@
 				<key>destination_path</key>
 				<string>%RECIPE_CACHE_DIR%/installer_payload</string>
 				<key>pkg_payload_path</key>
-				<string>%RECIPE_CACHE_DIR%/installer_unpack/Insta360_Studio_2020.pkg/Payload</string>
+				<string>%RECIPE_CACHE_DIR%/installer_unpack/Insta360_Studio_2021.pkg/Payload</string>
 				<key>purge_destination</key>
 				<true />
 			</dict>
@@ -75,7 +66,7 @@
 			<key>Arguments</key>
 			<dict>
 				<key>input_plist_path</key>
-				<string>%RECIPE_CACHE_DIR%/installer_payload/Applications/Insta360 Studio 2020.app/Contents/Info.plist</string>
+				<string>%RECIPE_CACHE_DIR%/installer_payload/Applications/Insta360 Studio 2021.app/Contents/Info.plist</string>
 				<key>plist_version_key</key>
 				<string>CFBundleShortVersionString</string>
 			</dict>
