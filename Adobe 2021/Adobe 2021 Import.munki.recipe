@@ -3,11 +3,15 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Import a Creative Cloud Application's pkg into Munki</string>
+        <string>Import a Creative Cloud Application's pkg into Munki
+        Please Review the changes to this recipe here
+        https://github.com/autopkg/dataJAR-recipes/blob/master/Adobe%202021/README.md</string>
         <key>Identifier</key>
         <string>com.github.dataJAR-recipes.munki.Import Adobe 2021 Title</string>
         <key>Input</key>
         <dict>
+            <key>force_munkiimport</key>
+            <true/>
             <key>MINIMUM_OS_VERSION</key>
             <string>10.14.0</string>
             <key>MUNKI_CATEGORY</key>
@@ -16,8 +20,10 @@
             <string>Some description.</string>
             <key>MUNKI_DEVELOPER</key>
             <string>Adobe</string>
-            <key>NAME</key>
+            <key>MUNKI_NAME</key>
             <string>SomeAdobe2021Title</string>
+            <key>NAME</key>
+            <string>SomeAdobe2021Title - must match package name</string>
             <key>MUNKI_REPO_SUBDIR</key>
             <string>%MUNKI_CATEGORY%/%MUNKI_DEVELOPER%/%NAME%</string>
             <key>pkginfo</key>
@@ -33,7 +39,7 @@
                 <key>developer</key>
                 <string>%MUNKI_DEVELOPER%</string>
                 <key>name</key>
-                <string>%NAME%</string>
+                <string>%MUNKI_NAME%</string>
                 <key>RestartAction</key>
                 <string>RequireLogout</string>
                 <key>unattended_install</key>
@@ -58,7 +64,7 @@
                     <key>dmg_root</key>
                     <string>%pkg_path%</string>
                     <key>dmg_path</key>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%_Install-%version%.dmg</string>
+                    <string>%RECIPE_CACHE_DIR%/%NAME%_Install%architecture_type%-%version%.dmg</string>
                 </dict>
             </dict>
             <dict>
@@ -69,7 +75,7 @@
                     <key>dmg_root</key>
                     <string>%uninstaller_pkg_path%</string>
                     <key>dmg_path</key>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%_Uninstall-%version%.dmg</string>
+                    <string>%RECIPE_CACHE_DIR%/%NAME%_Uninstall%architecture_type%-%version%.dmg</string>
                 </dict>
             </dict>
             <dict>
@@ -85,6 +91,8 @@
                     <dict>
                         <key>version</key>
                         <string>%version%</string>
+                        <key>installer_type</key>
+                        <string></string>
                     </dict>
                 </dict>
             </dict>
@@ -94,9 +102,9 @@
                 <key>Arguments</key>
                 <dict>
                     <key>pkg_path</key>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%_Install-%version%.dmg</string>
+                    <string>%RECIPE_CACHE_DIR%/%NAME%_Install%architecture_type%-%version%.dmg</string>
                     <key>uninstaller_pkg_path</key>
-                    <string>%RECIPE_CACHE_DIR%/%NAME%_Uninstall-%version%.dmg</string>
+                    <string>%RECIPE_CACHE_DIR%/%NAME%_Uninstall%architecture_type%-%version%.dmg</string>
                     <key>repo_subdirectory</key>
                     <string>%MUNKI_REPO_SUBDIR%</string>
                 </dict>
