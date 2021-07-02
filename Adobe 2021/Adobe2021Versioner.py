@@ -1,6 +1,6 @@
 #!/usr/local/autopkg/python
 '''
-Copyright (c) 2020, dataJAR Ltd.  All rights reserved.
+Copyright (c) 2021, dataJAR Ltd.  All rights reserved.
      Redistribution and use in source and binary forms, with or without
      modification, are permitted provided that the following conditions are met:
              * Redistributions of source code must retain the above copyright
@@ -53,7 +53,7 @@ from autopkglib import Processor, ProcessorError
 
 # Define class
 __all__ = ['Adobe2021Versioner']
-__version__ = ['1.4']
+__version__ = ['1.4.4']
 
 
 # Class def
@@ -208,6 +208,10 @@ class Adobe2021Versioner(Processor):
         # Get vers_compare_key
         self.env['vers_compare_key'] = 'CFBundleShortVersionString'
         self.output("vers_compare_key: {}".format(self.env['vers_compare_key']))
+
+        # Set bundle id
+        self.env['app_bundle_id'] = 'com.adobe.Acrobat.Pro'
+        self.output("app_bundle_id: {}".format(self.env['app_bundle_id']))
 
         # Create pkginfo with found details
         self.create_pkginfo()
@@ -378,9 +382,14 @@ class Adobe2021Versioner(Processor):
                         # Get version from info.plist
                         app_version = data[self.env['vers_compare_key']]
 
+                        # Get bundleid from info.plist
+                        self.env['app_bundle_id'] = data['CFBundleIdentifier']
+
                         # Progress notifications
                         self.output("vers_compare_key: {}"
                                     .format(self.env['vers_compare_key']))
+                        self.output("app_bundle_id: {}"
+                                    .format(self.env['app_bundle_id']))
                         self.output("staging_folder: {}"
                                     .format(bundle_location))
                         self.output("staging_folder_path: {}"
@@ -400,17 +409,43 @@ class Adobe2021Versioner(Processor):
             Read in values from app_json
         '''
 
-        # Get vers_compare_key
-        self.env['vers_compare_key'] = 'CFBundleShortVersionString'
-
         # Get app_version, cautiously for now for only certain apps
-        if self.env['sap_code'] == 'KBRG':
-            self.env['app_version'] = load_json['ProductVersion']
-        elif self.env['sap_code'] == 'ESHR':
+        if self.env['sap_code'] == 'ESHR':
             self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.dimension'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'ILST':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.illustrator'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'KBRG':
+            self.env['app_version'] = load_json['ProductVersion']
+            self.env['app_bundle_id'] = 'com.adobe.bridge11'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'LTRM':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.LightroomClassicCC7'
+            self.env['vers_compare_key'] = 'CFBundleVersion'
+        elif self.env['sap_code'] == 'SBSTA':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.adobe-substance-3d-sampler'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'SBSTD':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.substance-3d-designer'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'SBSTP':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.Adobe-Substance-3D-Painter'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'STGR':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.stager'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
         else:
             raise ProcessorError("Checking app_json for version details but sap code {},"
-                                 "is neither ESHR nor KBRG".format(self.env['sap_code']))
+                                 "is not within the known list of apps which we need to"
+                                 "check via their Application.json".format(self.env['sap_code']))
         self.output("app_version: {}".format(self.env['app_version']))
 
         # Get app_bundle
@@ -418,6 +453,7 @@ class Adobe2021Versioner(Processor):
             if app_launch.endswith('.app'):
                 app_bundle = ('/Applications/' + app_launch.split('.app')[0] + '/' + app_launch)
         self.output("app_bundle: {}".format(app_bundle))
+
 
     def create_pkginfo(self):
         '''
@@ -447,6 +483,7 @@ class Adobe2021Versioner(Processor):
                 'path': self.env['installed_path'],
                 'type': 'application',
                 'version_comparison_key': self.env['vers_compare_key'],
+                'CFBundleIdentifier': self.env['app_bundle_id'],
             }]
 
         # Set Processor Architecture info
