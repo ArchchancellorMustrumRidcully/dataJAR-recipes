@@ -1,4 +1,5 @@
 #!/usr/local/autopkg/python
+# pylint: disable = invalid-name
 '''
 Copyright (c) 2021, dataJAR Ltd.  All rights reserved.
      Redistribution and use in source and binary forms, with or without
@@ -53,7 +54,7 @@ from autopkglib import Processor, ProcessorError
 
 # Define class
 __all__ = ['Adobe2021Versioner']
-__version__ = ['1.4.4']
+__version__ = ['1.4.9']
 
 
 # Class def
@@ -404,15 +405,32 @@ class Adobe2021Versioner(Processor):
                                          .format(zip_path, err_msg))
 
 
+    # pylint: disable = too-many-branches, too-many-statements
     def parse_app_json(self, load_json):
         '''
             Read in values from app_json
         '''
 
         # Get app_version, cautiously for now for only certain apps
-        if self.env['sap_code'] == 'ESHR':
+        if self.env['sap_code'] == 'AICY':
+            self.env['app_version'] = load_json['ProductVersion']
+            self.env['app_bundle_id'] = 'com.adobe.InCopy'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'CHAR':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.Character-Animator.application'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'ESHR':
             self.env['app_version'] = load_json['CodexVersion']
             self.env['app_bundle_id'] = 'com.adobe.dimension'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'FLPR':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.Adobe-Animate-2021.application'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'IDSN':
+            self.env['app_version'] = load_json['ProductVersion']
+            self.env['app_bundle_id'] = 'com.adobe.InDesign'
             self.env['vers_compare_key'] = 'CFBundleShortVersionString'
         elif self.env['sap_code'] == 'ILST':
             self.env['app_version'] = load_json['CodexVersion']
@@ -426,6 +444,10 @@ class Adobe2021Versioner(Processor):
             self.env['app_version'] = load_json['CodexVersion']
             self.env['app_bundle_id'] = 'com.adobe.LightroomClassicCC7'
             self.env['vers_compare_key'] = 'CFBundleVersion'
+        elif self.env['sap_code'] == 'PHSP':
+            self.env['app_version'] = load_json['CodexVersion']
+            self.env['app_bundle_id'] = 'com.adobe.Photoshop'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
         elif self.env['sap_code'] == 'SBSTA':
             self.env['app_version'] = load_json['CodexVersion']
             self.env['app_bundle_id'] = 'com.adobe.adobe-substance-3d-sampler'
@@ -438,13 +460,17 @@ class Adobe2021Versioner(Processor):
             self.env['app_version'] = load_json['CodexVersion']
             self.env['app_bundle_id'] = 'com.adobe.Adobe-Substance-3D-Painter'
             self.env['vers_compare_key'] = 'CFBundleShortVersionString'
+        elif self.env['sap_code'] == 'SPRK':
+            self.env['app_version'] = load_json['ProductVersion']
+            self.env['app_bundle_id'] = 'com.adobe.xd'
+            self.env['vers_compare_key'] = 'CFBundleShortVersionString'
         elif self.env['sap_code'] == 'STGR':
             self.env['app_version'] = load_json['CodexVersion']
             self.env['app_bundle_id'] = 'com.adobe.stager'
             self.env['vers_compare_key'] = 'CFBundleShortVersionString'
         else:
-            raise ProcessorError("Checking app_json for version details but sap code {},"
-                                 "is not within the known list of apps which we need to"
+            raise ProcessorError("Checking app_json for version details but sap code {}, "
+                                 "is not within the known list of apps which we know to "
                                  "check via their Application.json".format(self.env['sap_code']))
         self.output("app_version: {}".format(self.env['app_version']))
 
@@ -490,7 +516,6 @@ class Adobe2021Versioner(Processor):
         if self.env['architecture_type'] == "x64":
             pkginfo['supported_architectures'] = [
                 'x86_64',
-                'i386',
             ]
             self.env['architecture_type'] = '-Intel'
         elif self.env['architecture_type'] == "arm64":
