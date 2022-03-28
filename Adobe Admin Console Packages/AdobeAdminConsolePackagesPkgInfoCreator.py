@@ -37,7 +37,6 @@ import json
 import os
 import re
 import xml
-from pathlib import Path
 from xml.etree import ElementTree
 
 
@@ -48,12 +47,12 @@ from autopkglib import (Processor,
 
 
 # Define class
-__all__ = ['AdobeAdminConsolePackagesVersioner']
+__all__ = ['AdobeAdminConsolePackagesPkgInfoCreator']
 __version__ = ['1.0']
 
 
 # Class def
-class AdobeAdminConsolePackagesVersioner(Processor):
+class AdobeAdminConsolePackagesPkgInfoCreator(Processor):
     '''
        Parses generated Adobe Admin Console Packages to generate installation information.
     '''
@@ -64,11 +63,20 @@ class AdobeAdminConsolePackagesVersioner(Processor):
     }
 
     output_variables = {
-        'aacp_application_path': {
-            'description': 'aacp_installdir_value after regex applied to get the path alone.',
-        },
         'aacp_application_architecture_type': {
             'description': 'The architecture type for the title, either arm64 or x86_64',
+        },
+        'aacp_application_bundle_id': {
+            'description': 'Value of the titles CFBundleIdentifier.',
+        },
+        'aacp_application_description': {
+            'description': 'Short description of the title.',
+        },
+        'aacp_application_display_name': {
+            'description': 'Display name of the title.',
+        },
+        'aacp_application_full_path': {
+            'description': 'Full path to the application bundle on disk, as per Terminal etc, not Finder.',
         },
         'aacp_application_install_lang': {
             'description': 'The titles installation langauage.',
@@ -79,14 +87,11 @@ class AdobeAdminConsolePackagesVersioner(Processor):
         'aacp_application_major_version': {
             'description': 'The major version of the title.',
         },
-        'aacp_blocking_applications': {
-            'description': 'Sorted set of the conflicting processes.',
-        },
-        'aacp_application_description': {
-            'description': 'Short description of the title.',
-        },
         'aacp_application_sap_code': {
             'description': 'The titles sap code.',
+        },
+        'aacp_blocking_applications': {
+            'description': 'Sorted set of the conflicting processes.',
         },
         'aacp_install_pkg_path': {
             'description': 'Path to the Adobe*_Install.pkg.',
@@ -315,7 +320,9 @@ class AdobeAdminConsolePackagesVersioner(Processor):
             # Get conflicting processes
             conflicting_processes = load_json['ConflictingProcesses']['ConflictingProcess']
             for conflicting_process in conflicting_processes:
-                blocking_applications.append(conflicting_process['ProcessDisplayName'])
+                # Only add if forceKillAllowed is False
+                if not conflicting_process['forceKillAllowed']:
+                    blocking_applications.append(conflicting_process['ProcessDisplayName'])
             if blocking_applications:
                 self.env['aacp_blocking_applications'] = sorted(set(blocking_applications))
                 self.output(f"aacp_blocking_applications: "
@@ -334,7 +341,7 @@ class AdobeAdminConsolePackagesVersioner(Processor):
         self.env['aacp_matched_json'] = None
 
         # Get this scripts parent directory
-        self.env['aacp_parent_dir'] = Path(__file__).cwd().as_posix()
+        self.env['aacp_parent_dir'] = os.path.dirname(os.path.realpath(__file__))
         self.output(f"aacp_parent_dir: {self.env['aacp_parent_dir']}")
 
         # Get the path to AdobeAutoPkgApplicationData.json
@@ -352,8 +359,6 @@ class AdobeAdminConsolePackagesVersioner(Processor):
                 self.env['aacp_autopkg_json'] = json.load(json_file)
             except json.JSONDecodeError as err_msg:
                 raise ProcessorError from err_msg
-
-        self.output("here")
 
         # Get applications dict from the json
         for application_data in self.env['aacp_autopkg_json']:
@@ -390,6 +395,15 @@ class AdobeAdminConsolePackagesVersioner(Processor):
         if not self.env['aacp_application_sap_code'] == 'APRO':
             self.env['version'] = load_json[self.env['aacp_matched_json']['app_json_version_key']]
             self.output(f"version: {self.env['version']}")
+
+        # If the version is unsupported
+        if 'unsupported_versions_dict' in self.env['aacp_matched_json']:
+            self.output(f"unsupported_versions_dict: "
+                        f"{self.env['aacp_matched_json']['unsupported_versions_dict']}")
+            for unsupported_version in self.env['aacp_matched_json']['unsupported_versions_dict']:
+                if unsupported_version == self.env['version']:
+                    raise ProcessorError(
+            f"{self.env['aacp_matched_json']['unsupported_versions_dict'][unsupported_version]}")
 
         # Applications bundle id
         self.env['aacp_application_bundle_id'] = self.env['aacp_matched_json']['app_bundle_id']
@@ -469,6 +483,12 @@ class AdobeAdminConsolePackagesVersioner(Processor):
         if self.env['aacp_application_minimum_os']:
             pkginfo['minimum_os_version'] = self.env['aacp_application_minimum_os']
 
+        # Check for any var replacements
+        for some_key in self.env:
+            # only process the keys beginning with aacp_ and those not ending _json
+            if some_key.startswith('aacp_') and not some_key.endswith('_json'):
+                self.replace_element(some_key)
+
         # Create pkginfo is missing from installs array
         #if 'pkginfo' not in self.env or 'installs' not in self.env['pkginfo']:
         pkginfo['installs'] = [{
@@ -484,5 +504,69 @@ class AdobeAdminConsolePackagesVersioner(Processor):
         self.output(f"additional_pkginfo: {self.env['additional_pkginfo']}")
 
 
+    # pylint: disable = too-many-branches
+    def replace_element(self, some_key):
+        '''
+            Checks for instances of %var_name% and replaces with the value for the matching
+            %var_name%
+        '''
+
+        # regex pattern
+        re_pattern = '%(.*?)%'
+
+        # If it's a string
+        if isinstance(self.env[some_key], str):
+            # check for a match
+            re_match = re.search(re_pattern, self.env[some_key])
+            # if we have a match
+            if re_match:
+                self.output(f"found: %{re_match[1]}% in {some_key}, looking to replace...")
+                self.env[some_key] = (self.env[some_key].replace('%' + re_match[1] + '%',
+                                      self.env[re_match[1]]))
+                self.output(f"{some_key} is now {self.env[some_key]}...")
+        # If a dict
+        elif isinstance(self.env[some_key], dict):
+            for sub_key in self.env[some_key]:
+                # check for a match
+                re_match = re.search('%(.*?)%', self.env[some_key][sub_key])
+                # if we have a match
+                if re_match:
+                    self.output(f"found: %{re_match[1]}% in {sub_key} from {some_key}, "
+                                 "looking to replace...")
+                    self.env[some_key][sub_key] = (self.env[some_key][sub_key].replace('%' +
+                                                   re_match[1] + '%', self.env[re_match[1]]))
+                    self.output(f"{sub_key} in {some_key} is now {self.env[some_key][sub_key]}...")
+        elif isinstance(self.env[some_key], list):
+            for list_item in self.env[some_key]:
+                # If it's a string
+                if isinstance(list_item, str):
+                    # check for a match
+                    re_match = re.search(re_pattern, list_item)
+                    # if we have a match
+                    if re_match:
+                        self.output(f"found: %{re_match[1]}% in {list_item}, looking to replace...")
+                        self.env[some_key][list_item] = self.env[some_key][list_item].replace('%' +
+                                                        re_match[1] + '%', self.env[re_match[1]])
+                        self.output(f"{list_item} is now {self.env[some_key][list_item]}...")
+                elif isinstance(list_item, dict):
+                    for sub_item in self.env[some_key][list_item]:
+                        # check for a match
+                        re_match = re.search('%(.*?)%', self.env[some_key][list_item])
+                        # if we have a match
+                        if re_match:
+                            self.output(f"found: %{re_match[1]}% in {sub_item} from {list_item}, "
+                                         "looking to replace...")
+                            self.env[some_key][list_item] = (
+                                self.env[some_key][list_item].replace('%' + re_match[1] + '%',
+                                self.env[re_match[1]]))
+                            self.output(f"{sub_item} in {list_item} is now "
+                                        f"{self.env[some_key][list_item]}...")
+                else:
+                    self.output(f"{some_key} is {type(self.env[some_key])}, processing skipped..")
+        else:
+            self.output(f"{some_key} is {type(self.env[some_key])}, processing skipped..")
+
+
+
 if __name__ == '__main__':
-    PROCESSOR = AdobeAdminConsolePackagesVersioner()
+    PROCESSOR = AdobeAdminConsolePackagesPkgInfoCreator()

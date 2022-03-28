@@ -3,23 +3,18 @@
 <plist version="1.0">
     <dict>
         <key>Description</key>
-        <string>Import Adobe Admin Console Packages into Munki
-        Please Review the changes to this recipe here
-        https://github.com/autopkg/dataJAR-recipes/blob/master/Adobe%202021/README.md</string>
+        <string>Imports Adobe InCopy 2022 into Munki, please review:
+https://github.com/autopkg/dataJAR-recipes/blob/master/Adobe%20Admin%20Console%20Packages/README.md</string>
         <key>Identifier</key>
-        <string>com.github.dataJAR-test-recipes.munki.Import Adobe Admin Console Packages</string>
+        <string>com.github.dataJAR-recipes.munki.Adobe InCopy 2022</string>
         <key>Input</key>
         <dict>
-            <key>force_munkiimport</key>
-            <true/>
             <key>MUNKI_CATEGORY</key>
-            <string>Applications</string>
+            <string>Adobe CC 2022</string>
             <key>MUNKI_DEVELOPER</key>
             <string>Adobe</string>
-            <key>MUNKI_NAME</key>
-            <string>SomeAdobe2021Title</string>
             <key>NAME</key>
-            <string>SomeAdobe2021Title - must match package name</string>
+            <string>AdobeInCopy2022</string>
             <key>MUNKI_REPO_SUBDIR</key>
             <string>%MUNKI_CATEGORY%/%MUNKI_DEVELOPER%/%NAME%</string>
             <key>pkginfo</key>
@@ -30,14 +25,14 @@
                 </array>
                 <key>category</key>
                 <string>%MUNKI_CATEGORY%</string>
-                <key>description</key>
-                <string>%MUNKI_DESCRIPTION%</string>
                 <key>developer</key>
                 <string>%MUNKI_DEVELOPER%</string>
                 <key>name</key>
-                <string>%MUNKI_NAME%</string>
-                <key>RestartAction</key>
-                <string>RequireLogout</string>
+                <string>%NAME%</string>
+                <key>unattended_install</key>
+                <true/>
+                <key>unattended_uninstall</key>
+                <true/>
             </dict>
         </dict>
         <key>MinimumVersion</key>
@@ -46,7 +41,7 @@
         <array>
             <dict>
                 <key>Processor</key>
-                <string>AdobeAdminConsolePackagesVersioner</string>
+                <string>AdobeAdminConsolePackagesPkgInfoCreator</string>
             </dict>
             <dict>
                 <key>Processor</key>
@@ -77,16 +72,16 @@
             <dict>
                 <key>Processor</key>
                 <string>MunkiPkginfoMerger</string>
-				<key>Arguments</key>
-				<dict>
-					<key>additional_pkginfo</key>
-					<dict>
+                <key>Arguments</key>
+                <dict>
+                    <key>additional_pkginfo</key>
+                    <dict>
                         <key>installer_type</key>
                         <string/>
-                		<key>version</key>
-                		<string>%version%</string>
-					</dict>
-				</dict>
+                        <key>version</key>
+                        <string>%version%</string>
+                    </dict>
+                </dict>
             </dict>
             <dict>
                 <key>Processor</key>
