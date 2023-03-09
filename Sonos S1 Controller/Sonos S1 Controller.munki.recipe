@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads the latest version of Ultimaker Cura and imports it into Munki.</string>
+    <string>Downloads the latest version of Sonos S1 Controller and imports it into Munki.</string>
     <key>Identifier</key>
-    <string>com.github.dataJAR-recipes.munki.Ultimaker Cura</string>
+    <string>com.github.dataJAR-recipes.munki.Sonos S1 Controller</string>
     <key>Input</key>
     <dict>
         <key>MUNKI_REPO_SUBDIR</key>
         <string>apps/%NAME%</string>
         <key>NAME</key>
-        <string>Ultimaker Cura</string>
+        <string>SonosS1Controller</string>
         <key>pkginfo</key>
         <dict>
             <key>catalogs</key>
@@ -19,11 +19,15 @@
                 <string>testing</string>
             </array>
             <key>description</key>
-            <string>Ultimaker Cura prepares your model for 3D printing. For novices, it makes it easy to get great results. For experts, there are over 200 settings to adjust to your needs. And integration with major software platforms makes 3D printing even simpler.</string>
+            <string>Take total control of your home listening experience with the Sonos app. Play, control and explore your music, your way.</string>
+            <key>developer</key>
+            <string>Sonos, Inc.</string>
             <key>display_name</key>
-            <string>Ultimaker Cura</string>
+            <string>Sonos S1 Controller</string>
             <key>name</key>
             <string>%NAME%</string>
+            <key>unattended_install</key>
+            <true/>
             <key>unattended_install</key>
             <true/>
         </dict>
@@ -31,26 +35,10 @@
     <key>MinimumVersion</key>
     <string>1.1</string>
     <key>ParentRecipe</key>
-    <string>com.github.dataJAR-recipes.download.Ultimaker Cura</string>
+    <string>com.github.dataJAR-recipes.download.Sonos S1 Controller</string>
     <key>Process</key>
     <array>
         <dict>
-            <key>Processor</key>
-            <string>PlistReader</string>
-            <key>Arguments</key>
-            <dict>
-                <key>info_path</key>
-                <string>%pathname%/UltiMaker Cura.app</string>
-                <key>plist_keys</key>
-                <dict>
-                    <key>CFBundleShortVersionString</key>
-                    <string>version</string>
-                </dict>
-            </dict>
-        </dict>
-        <dict>
-            <key>Processor</key>
-            <string>MunkiPkginfoMerger</string>
             <key>Arguments</key>
             <dict>
                 <key>additional_pkginfo</key>
@@ -59,10 +47,10 @@
                     <string>%version%</string>
                 </dict>
             </dict>
+            <key>Processor</key>
+            <string>MunkiPkginfoMerger</string>
         </dict>
         <dict>
-            <key>Processor</key>
-            <string>MunkiImporter</string>
             <key>Arguments</key>
             <dict>
                 <key>pkg_path</key>
@@ -70,8 +58,10 @@
                 <key>repo_subdirectory</key>
                 <string>%MUNKI_REPO_SUBDIR%</string>
                 <key>version_comparison_key</key>
-                <string>CFBundleShortVersionString</string>
+                <string>CFBundleVersion</string>
             </dict>
+            <key>Processor</key>
+            <string>MunkiImporter</string>
         </dict>
     </array>
 </dict>

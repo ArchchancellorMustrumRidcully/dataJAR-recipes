@@ -3,47 +3,45 @@
 <plist version="1.0">
 <dict>
     <key>Description</key>
-    <string>Downloads the most recent version of VMware Fusion 13 and imports it into Munki.</string>
+    <string>Downloads the current release version of ArrayCalc V11, builds a package and imports it to Munki.</string>
     <key>Identifier</key>
-    <string>com.github.dataJAR-recipes.munki.VMware Fusion 13</string>
+    <string>com.github.dataJAR-recipes.munki.ArrayCalc V11</string>
     <key>Input</key>
     <dict>
         <key>NAME</key>
-        <string>VMwareFusion13</string>
+        <string>ArrayCalcV11</string>
         <key>MUNKI_REPO_SUBDIR</key>
-        <string>apps/VMware</string>
+        <string>apps</string>
         <key>pkginfo</key>
         <dict>
+            <key>blocking_applications</key>
+            <array>
+                <string>ArrayCalc V11</string>
+            </array>
             <key>catalogs</key>
             <array>
                 <string>testing</string>
             </array>
+            <key>category</key>
+            <string>Applications</string>
             <key>description</key>
-            <string>VMware Fusion is the easiest, fastest, and most reliable way to run Windows and other x86 based operating systems on a Mac without rebooting.</string>
+            <string>The d&amp;b ArrayCalc simulation software is the simulation tool for d&amp;b line arrays, column and point source loudspeakers as well as subwoofers. This is a comprehensive toolbox for all tasks associated with acoustic design, performance prediction, alignment, rigging and safety parameters.</string>
             <key>developer</key>
-            <string>VMware</string>
+            <string>d&amp;b audiotechnik GmbH &amp; Co</string>
             <key>display_name</key>
-            <string>VMWare Fusion Pro 13</string>
+            <string>ArrayCalc V11</string>
             <key>name</key>
             <string>%NAME%</string>
             <key>unattended_install</key>
             <true/>
-            <key>postinstall_script</key>
-            <string>#!/bin/bash
-#
-# Pinched with &lt;3 from: https://github.com/autopkg/justinrummel-recipes/blob/42bc13881fe373f771cefec20a53d7844172019f/VMware%20Fusion/VMwareFusion.pkg.munki.recipe
-#
-
-if [ -e /Applications/VMware\ Fusion.app/Contents/Library/Initialize\ VMware\ Fusion.tool ]
-then
-        /Applications/VMware\ Fusion.app/Contents/Library/Initialize\ VMware\ Fusion.tool set
-fi</string>
+            <key>unattended_uninstall</key>
+            <true/>
         </dict>
     </dict>
     <key>MinimumVersion</key>
-    <string>1.1.1</string>
+    <string>1.1</string>
     <key>ParentRecipe</key>
-    <string>com.github.dataJAR-recipes.download.VMware Fusion 13</string>
+    <string>com.github.dataJAR-recipes.download.ArrayCalc V11</string>
     <key>Process</key>
     <array>
         <dict>
@@ -55,6 +53,8 @@ fi</string>
                 <string>%pathname%</string>
                 <key>repo_subdirectory</key>
                 <string>%MUNKI_REPO_SUBDIR%</string>
+                <key>version_comparison_key</key>
+                <string>CFBundleShortVersionString</string>
             </dict>
         </dict>
     </array>
