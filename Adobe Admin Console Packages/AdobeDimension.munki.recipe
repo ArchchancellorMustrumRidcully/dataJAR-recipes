@@ -14,7 +14,7 @@ https://github.com/autopkg/dataJAR-test-recipes./blob/master/Adobe%20Admin%20Con
             <key>MUNKI_DEVELOPER</key>
             <string>Adobe</string>
             <key>MUNKI_DESCRIPTION</key>
-            <string>%aacp_application_description</string>
+            <string>%aacp_application_description%</string>
             <key>MUNKI_DISPLAY_NAME</key>
             <string>%aacp_application_display_name%</string>
             <key>NAME</key>
@@ -93,7 +93,7 @@ then
     # Progress notification
     /bin/echo "Uninstalling %aacp_application_display_name%..."
     # Attempt the uninstall
-    if "${uninstallerPath}" --baseVersion="%aacp_application_base_version%" --deleteUserPreferences="false" --platform="macOS" --sapCode="%aacp_sap_code%" --uninstall="1"
+    if "${uninstallerPath}" --baseVersion="%aacp_application_base_version%" --deleteUserPreferences="false" --platform="macOS" --sapCode="%aacp_application_sap_code%" --uninstall="1"
     then
         # Progress notification
         /bin/echo "Successfully uninstalled %aacp_application_display_name%..."
